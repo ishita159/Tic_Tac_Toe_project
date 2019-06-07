@@ -5,9 +5,34 @@ using namespace std;
 #define Cross 'X'
 #define Circle 'O'
 #define empty '0'
-string Turn;
+bool Turn = 0;
 char Board_Layout[7][7];
 char Check_Board[3][3] = {empty};
+
+std::string reset = "\033[0m";
+std::string black = "\033[0;30m";
+std::string blackb = "\033[1;30m";
+std::string white = "\033[0;37m";
+std::string whiteb = "\033[1;37m";
+std::string red = "\033[0;31m";
+std::string redb = "\033[1;31m";
+std::string green = "\033[0;32m";
+std::string greenb = "\033[1;32m";
+std::string yellow = "\033[0;33m";
+std::string yellowb = "\033[1;33m";
+std::string blue = "\033[0;34m";
+std::string blueb = "\033[1;34m";
+std::string purple = "\033[0;35m";
+std::string purpleb = "\033[1;35m";
+std::string lightblue = "\033[0;36m";
+std::string lightblueb = "\033[1;36m";
+#define underline "\033[4m"
+#define closeunderline "\033[0m"
+
+int randNum(int min, int max)
+{
+    return rand() % max + min;
+}
 
 class Board
 {
@@ -41,19 +66,36 @@ void Board::showBoard()
 {
     for (int i = 0; i < 7; i++)
     {
+        cout << "\t\t\t\t\t";
         for (int j = 0; j < 7; j++)
         {
-            printf("%c ", Board_Layout[i][j]);
+            if (Board_Layout[i][j] == Character)
+            {
+                cout << blue << Board_Layout[i][j] << reset << " ";
+            }
+            else
+            {
+                cout << yellow << Board_Layout[i][j] << reset << " ";
+            }
         }
         printf("\n");
     }
+    /* BOARD DESIGN
+       + + + + + + + 
+       +   +   +   + 
+       + + + + + + + 
+       +   +   +   + 
+       + + + + + + + 
+       +   +   +   + 
+       + + + + + + + 
+    */
 }
 
 void Board::changeBoard(int x, int y)
 {
     x = (2 * x) + 1;
     y = (2 * y) + 1;
-    if (Turn == "Human")
+    if (Turn == 0)
     {
         Board_Layout[x][y] = Cross;
     }
@@ -63,6 +105,32 @@ void Board::changeBoard(int x, int y)
     }
 }
 
+void showInstructions()
+{
+    cout << underline << "\t\t\t\t\tTic-Tac-Toe\n\n";
+    Board board;
+    board.initialize();
+    board.showBoard();
+    cout << "\n\n1.Give input as x and y to choose your desired cell.\n2.Play the FIRST MOVE\n\t\t\t\t\tBEGIN...\n\n";
+}
+void GameOver()
+{
+    cout << underline << "\t\t\t\t\tMAIN MENU\n\n"<<closeunderline;
+    cout << "\t\t\t\t1. Press 1 to START NEW GAME\n\t\t\t\t2. Press 2 to EXIT\nEnter Choice...\n\t";
+    int choice;
+    scanf("%d", &choice);
+    switch (choice)
+    {
+    case 1:
+        cout << "\t\t\t\tExiting Game...";
+        break;
+
+    case 2:
+        system("cls");
+        cout << "\t\t\t\tNEW GAME\n";
+        showInstructions();
+    }
+}
 class InputGenerator
 {
 public:
@@ -72,6 +140,9 @@ public:
     virtual bool rowCrossed() = 0;
     virtual bool columnCrossed() = 0;
     virtual bool diagonalCrossed() = 0;
+    virtual bool Intelligence_Level_Computer() = 0;
+    virtual bool Intelligence_Level_User() = 0;
+    virtual void randomMove() = 0;
 };
 bool InputGenerator::rowCrossed()
 {
@@ -113,7 +184,7 @@ bool InputGenerator::CheckWin()
 {
     if (diagonalCrossed() || columnCrossed() || rowCrossed())
     {
-        std::cout << "GAME OVER!!";
+        std::cout << "\t\t\t\tGAME OVER!!";
         return (true);
     }
     return (false);
@@ -132,6 +203,7 @@ int InputGenerator::verifyMove(int x, int y)
 
 class User : public InputGenerator, public Board
 {
+public:
     void Move();
 };
 
@@ -146,21 +218,26 @@ void User::Move()
         scanf("%d", &x);
         std::cout << "\nY : ";
         scanf("%d", &y);
-        if (!verifyMove(x, y))
+        if (!verifyMove(x - 1, y - 1))
         {
-            std::cout << "INVALID INPUT\n"
-                      << "ENTER AGAIN\n";
+            std::cout << "\t\t\t\tINVALID INPUT\n"
+                      << "\t\t\t\tENTER AGAIN\n";
             continue;
         }
         else
         {
-            Check_Board[x][y] = Cross;
+            Check_Board[x - 1][y - 1] = Cross;
             std::cout << "Changing Board...\n";
-            changeBoard(x, y);
-            Turn = "Computer";
+            changeBoard(x - 1, y - 1);
+            cout << "\n\n";
+            showBoard();
+            valid = 1;
+            Turn = 1;
             if (CheckWin())
             {
-                std::cout << "CONGRATULATIONS YOU WON!!!";
+                std::cout << "\n\t\t\t\tCONGRATULATIONS YOU WON!!!\n\n\n";
+                showBoard();
+                GameOver();
             }
         }
     }
@@ -168,79 +245,124 @@ void User::Move()
 
 class Computer : public InputGenerator, public Board
 {
+public:
     void move();
+    bool Intelligence_Level_Computer();
+    bool Intelligence_Level_User();
+    void randomMove();
 };
-void Computer::move()
+bool Computer::Intelligence_Level_Computer()
 {
-    int flag = 0;
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
         {
             if (Check_Board[i][j] == empty)
             {
-                if (Check_Board[i][j] = Circle)
+                Check_Board[i][j] = Circle;
+                if (CheckWin())
                 {
-                    if (CheckWin())
-                    {
-                        Check_Board[i][j] = Circle;
-                        changeBoard(i,j);
-                        cout << "COMPUTER WON!!\n";
-                        flag++;
-                        break;
-                    }
+                    changeBoard(i, j);
+                    showBoard();
+                    cout << "\n\t\t\t\tCOMPUTER WON!!!\n\n\n";
+                    return (true);
                 }
-                if (Check_Board[i][j] = Cross)
+                else
                 {
-                    if (CheckWin())
-                    {
-                        Check_Board[i][j] = Circle;
-                        changeBoard(i, j);
-                        Turn = "Human";
-                        flag++;
-                        break;
-                    }
+                    Check_Board[i][j] = empty;
                 }
             }
         }
-        if (flag > 0)
-        {
-            break;
-        }
     }
-    if (flag > 0)
+    return (false);
+}
+bool Computer::Intelligence_Level_User()
+{
+    for (int i = 0; i < 3; i++)
     {
-        int flag2 = 0;
-        for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
         {
-            for (int j = 0; j < 3; j++)
+            if (Check_Board[i][j] == empty)
             {
-                if (Check_Board[i][j] == empty)
+                Check_Board[i][j] = Cross;
+                if (CheckWin())
                 {
                     Check_Board[i][j] = Circle;
-                    Turn = "Human";
-                    flag2++;
-                    break;
+                    Turn = 0;
+                    changeBoard(i, j);
+                    return (true);
                 }
-            }
-            if (flag2 > 0)
-            {
-                break;
+                else
+                {
+                    Check_Board[i][j] = empty;
+                }
             }
         }
     }
+    return (false);
 }
-void showInstructions()
+void Computer::randomMove()
 {
-    printf("\t\t\t  Tic-Tac-Toe\n\n");
-    Board board;
-    board.initialize();
-    board.showBoard();
-    std::cout << "Give input as x and y to choose your desired cell.\n";
+    int run = 0;
+    while (run == 0)
+    {
+        int x = randNum(0, 2);
+        int y = randNum(0, 2);
+        if (Check_Board[x][y] == empty)
+        {
+            Check_Board[x][y] = Circle;
+            changeBoard(x, y);
+            run = 1;
+            Turn = 0;
+        }
+    }
 }
 
-int main()
+void Computer::move()
+{
+    if (Intelligence_Level_Computer())
+    {
+        GameOver();
+    }
+    else
+    {
+        if (Intelligence_Level_User())
+        {
+            cout << "\n\n";
+            showBoard();
+        }
+        else
+        {
+            randomMove();
+            cout << "\n\n";
+            showBoard();
+        }
+    }
+}
+/*void playGame()
 {
     showInstructions();
+    Computer computer;
+    User user;
+    int moves = 9;
+    while (moves--)
+    {
+        if (Turn == 0)
+        {
+            user.Move();
+        }
+        if (Turn == 1)
+        {
+            computer.move();
+        }
+    }
+}
+*/
+int main()
+{
+    // playGame();
+    showInstructions();
+    GameOver();
+
     return 0;
 }
