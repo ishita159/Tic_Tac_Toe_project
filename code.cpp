@@ -1,10 +1,11 @@
 #include <bits/stdc++.h>
+using namespace std;
 #define Blank ' '
 #define Character '+'
 #define Cross 'X'
 #define Circle 'O'
 #define empty '0'
-int move = 0;
+string Turn;
 char Board_Layout[7][7];
 char Check_Board[3][3] = {empty};
 
@@ -52,7 +53,7 @@ void Board::changeBoard(int x, int y)
 {
     x = (2 * x) + 1;
     y = (2 * y) + 1;
-    if (move % 2 == 0)
+    if (Turn == "Human")
     {
         Board_Layout[x][y] = Cross;
     }
@@ -110,8 +111,9 @@ bool InputGenerator::diagonalCrossed()
 }
 bool InputGenerator::CheckWin()
 {
-    if(diagonalCrossed() || columnCrossed() || rowCrossed())
+    if (diagonalCrossed() || columnCrossed() || rowCrossed())
     {
+        std::cout << "GAME OVER!!";
         return (true);
     }
     return (false);
@@ -131,7 +133,6 @@ int InputGenerator::verifyMove(int x, int y)
 class User : public InputGenerator, public Board
 {
     void Move();
-    
 };
 
 void User::Move()
@@ -156,6 +157,7 @@ void User::Move()
             Check_Board[x][y] = Cross;
             std::cout << "Changing Board...\n";
             changeBoard(x, y);
+            Turn = "Computer";
             if (CheckWin())
             {
                 std::cout << "CONGRATULATIONS YOU WON!!!";
@@ -166,7 +168,68 @@ void User::Move()
 
 class Computer : public InputGenerator, public Board
 {
+    void move();
 };
+void Computer::move()
+{
+    int flag = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (Check_Board[i][j] == empty)
+            {
+                if (Check_Board[i][j] = Circle)
+                {
+                    if (CheckWin())
+                    {
+                        Check_Board[i][j] = Circle;
+                        changeBoard(i,j);
+                        cout << "COMPUTER WON!!\n";
+                        flag++;
+                        break;
+                    }
+                }
+                if (Check_Board[i][j] = Cross)
+                {
+                    if (CheckWin())
+                    {
+                        Check_Board[i][j] = Circle;
+                        changeBoard(i, j);
+                        Turn = "Human";
+                        flag++;
+                        break;
+                    }
+                }
+            }
+        }
+        if (flag > 0)
+        {
+            break;
+        }
+    }
+    if (flag > 0)
+    {
+        int flag2 = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (Check_Board[i][j] == empty)
+                {
+                    Check_Board[i][j] = Circle;
+                    Turn = "Human";
+                    flag2++;
+                    break;
+                }
+            }
+            if (flag2 > 0)
+            {
+                break;
+            }
+        }
+    }
+}
 void showInstructions()
 {
     printf("\t\t\t  Tic-Tac-Toe\n\n");
