@@ -368,25 +368,22 @@ void Computer::move()
     if (Intelligence_Level_Computer()) //Checks for a Winning Move
     {
         GameOver();
-        ChangeTurn();
-        return;
     }
 
-    if (Intelligence_Level_User()) //checks if User has any Winning Move
+    else if (Intelligence_Level_User()) //checks if User has any Winning Move
     {
         cout << "\n\nComputer's Move\n";
         showBoard();
-        ChangeTurn();
-        return;
+        
     }
     else
     {
         randomMove(); //Generates a randon Move if no team has a Winning Move
         cout << "\n\nComputer's Move\n";
         showBoard();
-        ChangeTurn();
-        return;
+        
     }
+    ChangeTurn();
 }
 void Board::playGame()
 {
