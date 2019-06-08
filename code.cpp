@@ -5,9 +5,9 @@ using namespace std;
 #define Cross 'X'     //User's Symbol
 #define Circle 'O'    //Computer's Symbol
 #define empty '0'
-bool Turn = 0;
-char Board_Layout[7][7];
-char Check_Board[3][3] = {empty};
+#define computer 1;
+#define user 0;
+
 //Colour Scheming
 std::string reset = "\033[0m";
 std::string black = "\033[0;30m";
@@ -30,21 +30,41 @@ std::string lightblueb = "\033[1;36m";
 #define underline "\033[4m"
 #define closeunderline "\033[0m"
 
-int randNum(int min, int max) //Function to generate Random numbers in Computer's Move() function
-{
-    return rand() % max + min;
-}
+
 
 class Board
 {
 public:
+    bool Turn;
+    char Board_Layout[7][7];
+    char Check_Board[3][3];
     void initialize();
     void changeBoard(int x, int y);
     void showBoard();
+    void playGame();
+    void showInstructions();
+    void GameOver();
+    void ChangeTurn();
 };
+void Board::ChangeTurn()
+{
+    if (Turn == 1)
+    {
+        Turn = user;
+  }  
+  else
+  {
+      Turn = computer;
+  }
+  
 
+}
 void Board::initialize()
 {
+
+    Turn = user;
+    memset(Board_Layout, empty, sizeof(Board_Layout));
+    memset(Check_Board, empty, sizeof(Check_Board));
     for (int i = 0; i < 7; i++)
     {
 
@@ -106,7 +126,7 @@ void Board::changeBoard(int x, int y)
     }
 }
 
-void showInstructions()
+void Board::showInstructions()
 {
     cout << underline << "\t\t\t\t\tTic-Tac-Toe\n\n";
     Board board;
@@ -114,7 +134,7 @@ void showInstructions()
     board.showBoard();
     cout << "\n\n1.Give input as x and y to choose your desired cell.\n2.Play the FIRST MOVE\n\t\t\t\t\tBEGIN...\n\n";
 }
-void GameOver() //this function is called when either of the team wins the game
+void Board::GameOver() //this function is called when either of the team wins the game
 {
     cout << underline << "\t\t\t\t\tMAIN MENU\n\n"
          << closeunderline;
@@ -133,26 +153,31 @@ void GameOver() //this function is called when either of the team wins the game
         showInstructions();
     }
 }
-class InputGenerator
+class InputGenerator:public Board
 {
 public:
-    virtual void Move() = 0;
-    virtual int verifyMove(int x, int y) = 0;
-    virtual bool CheckWin() = 0;
-    virtual bool rowCrossed() = 0;
-    virtual bool columnCrossed() = 0;
-    virtual bool diagonalCrossed() = 0;
-    virtual bool Intelligence_Level_Computer() = 0;
-    virtual bool Intelligence_Level_User() = 0;
-    virtual void randomMove() = 0;
+    void Move();
+    int verifyMove(int x, int y);
+    bool CheckWin();
+    bool rowCrossed();
+    bool columnCrossed();
+    bool diagonalCrossed();
+    bool Intelligence_Level_Computer();
+    bool Intelligence_Level_User();
+    void randomMove();
+    int randNum(int min, int max); //Function to generate Random numbers in Computer's Move() function
 };
+int InputGenerator::randNum(int min, int max) //Function to generate Random numbers in Computer's Move() function
+{
+    return rand() % max + min;
+}
 bool InputGenerator::rowCrossed() //checks if a row is crossed
 {
     for (int i = 0; i < 3; i++)
     {
         if (Check_Board[i][0] == Check_Board[i][1] &&
             Check_Board[i][1] == Check_Board[i][2] &&
-            Check_Board[i][0] != ' ')
+            Check_Board[i][0] != empty)
             return (true);
     }
     return (false);
@@ -165,14 +190,14 @@ bool InputGenerator::rowCrossed() //checks if a row is crossed
        + + + + + + + 
        +   +   +   + 
        + + + + + + + 
-    */
+*/
 bool InputGenerator::columnCrossed() //checks if a column is crossed
 {
     for (int i = 0; i < 3; i++)
     {
         if (Check_Board[0][i] == Check_Board[1][i] &&
             Check_Board[1][i] == Check_Board[2][i] &&
-            Check_Board[0][i] != ' ')
+            Check_Board[0][i] != empty)
             return (true);
     }
     return (false);
@@ -190,12 +215,12 @@ bool InputGenerator::diagonalCrossed() //checks if a diagonal is crossed
 {
     if (Check_Board[0][0] == Check_Board[1][1] &&
         Check_Board[1][1] == Check_Board[2][2] &&
-        Check_Board[0][0] != ' ')
+        Check_Board[0][0] != empty)
         return (true);
 
     if (Check_Board[0][2] == Check_Board[1][1] &&
         Check_Board[1][1] == Check_Board[2][0] &&
-        Check_Board[0][2] != ' ')
+        Check_Board[0][2] != empty)
         return (true);
 
     return (false);
@@ -213,7 +238,6 @@ bool InputGenerator::CheckWin() //winning Condition
 {
     if (diagonalCrossed() || columnCrossed() || rowCrossed())
     {
-        std::cout << "\t\t\t\tGAME OVER!!";
         return (true);
     }
     return (false);
@@ -230,7 +254,7 @@ int InputGenerator::verifyMove(int x, int y) //Checks if input is in range and t
     }
 }
 
-class User : public InputGenerator, public Board
+class User : public InputGenerator
 {
 public:
     void Move();
@@ -261,7 +285,7 @@ void User::Move()
             cout << "\n\n";
             showBoard();
             valid = 1;
-            Turn = 1;
+            ChangeTurn();
             if (CheckWin())
             {
                 std::cout << "\n\t\t\t\tCONGRATULATIONS YOU WON!!!\n\n\n";
@@ -272,7 +296,7 @@ void User::Move()
     }
 }
 
-class Computer : public InputGenerator, public Board
+class Computer : public InputGenerator
 {
 public:
     void move();
@@ -317,8 +341,8 @@ bool Computer::Intelligence_Level_User()
                 if (CheckWin())
                 {
                     Check_Board[i][j] = Circle;
-                    Turn = 0;
                     changeBoard(i, j);
+                    ChangeTurn();
                     return (true);
                 }
                 else
@@ -368,29 +392,30 @@ void Computer::move()
         }
     }
 }
-/*void playGame()
+void Board::playGame()
 {
     showInstructions();
-    Computer computer;
-    User user;
+    Computer Computer_;
+    User User_;
     int moves = 9;
     while (moves--)
     {
         if (Turn == 0)
         {
-            user.Move();
+            User_.Move();
         }
         if (Turn == 1)
         {
-            computer.move();
+            Computer_.move();
         }
     }
     cout << "\t\t\t\t\tIT'S A TIE!!!\n";
     GameOver();  
 }
-*/
+
 int main()
 {
-    // playGame();
+    Board board;
+    board.playGame();
     return 0;
 }
