@@ -30,12 +30,14 @@ std::string lightblueb = "\033[1;36m";
 #define underline "\033[4m"
 #define closeunderline "\033[0m"
 char Check_Board[3][3];
+char Board_Layout[7][7];
+bool Turn;
 
 class Board
 {
 public:
-    bool Turn;
-    char Board_Layout[7][7];
+   
+   
     void initialize();
     void changeBoard(int x, int y);
     void showBoard();
@@ -61,7 +63,7 @@ void Board::initialize()
 {
 
     Turn = user;
-    memset(Board_Layout, Blank, sizeof(Board_Layout));
+    //memset(Board_Layout, Blank, sizeof(Board_Layout));
     memset(Check_Board, empty, sizeof(Check_Board));
     for (int i = 0; i < 7; i++)
     {
@@ -155,7 +157,7 @@ class InputGenerator
 {
 public:
     void Move();
-    int verifyMove(int x, int y);
+    bool verifyMove(int x, int y);
     bool CheckWin();
     bool rowCrossed();
     bool columnCrossed();
@@ -240,15 +242,15 @@ bool InputGenerator::CheckWin() //winning Condition
     }
     return (false);
 }
-int InputGenerator::verifyMove(int x, int y) //Checks if input is in range and the chosen cell is avaliable
+bool InputGenerator::verifyMove(int x, int y) //Checks if input is in range and the chosen cell is avaliable
 {
     if (x > 2 || y > 2 || x < 0 || y < 0 || Check_Board[x][y] != empty)
     {
-        return 0;
+        return false;
     }
     else
     {
-        return 1;
+        return true;
     }
 }
 
@@ -264,7 +266,7 @@ void User::Move()
 
     while (valid == 0)
     {
-        std::cout << "Give Values:"
+        std::cout << "\nGive Values:"
                   << "\nX : ";
         scanf("%d", &x);
         std::cout << "\nY : ";
@@ -364,7 +366,6 @@ void Computer::randomMove()
             Check_Board[x][y] = Circle;
             changeBoard(x, y);
             run = 1;
-            Turn = 0;
         }
     }
 }
@@ -389,6 +390,7 @@ void Computer::move()
             showBoard();
         }
     }
+    ChangeTurn();
 }
 void Board::playGame()
 {
@@ -414,7 +416,6 @@ void Board::playGame()
 int main()
 {
     Board board;
-    board.showBoard();
-    //board.playGame();
-        return 0;
+    board.playGame();
+    return 0;
 }
