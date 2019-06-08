@@ -29,15 +29,13 @@ std::string lightblueb = "\033[1;36m";
 //Underline
 #define underline "\033[4m"
 #define closeunderline "\033[0m"
-
-
+char Check_Board[3][3];
 
 class Board
 {
 public:
     bool Turn;
     char Board_Layout[7][7];
-    char Check_Board[3][3];
     void initialize();
     void changeBoard(int x, int y);
     void showBoard();
@@ -63,7 +61,7 @@ void Board::initialize()
 {
 
     Turn = user;
-    memset(Board_Layout, empty, sizeof(Board_Layout));
+    memset(Board_Layout, Blank, sizeof(Board_Layout));
     memset(Check_Board, empty, sizeof(Check_Board));
     for (int i = 0; i < 7; i++)
     {
@@ -153,7 +151,7 @@ void Board::GameOver() //this function is called when either of the team wins th
         showInstructions();
     }
 }
-class InputGenerator:public Board
+class InputGenerator
 {
 public:
     void Move();
@@ -254,7 +252,7 @@ int InputGenerator::verifyMove(int x, int y) //Checks if input is in range and t
     }
 }
 
-class User : public InputGenerator
+class User : public InputGenerator, public Board
 {
 public:
     void Move();
@@ -296,7 +294,7 @@ void User::Move()
     }
 }
 
-class Computer : public InputGenerator
+class Computer : public InputGenerator, public Board
 {
 public:
     void move();
@@ -416,6 +414,7 @@ void Board::playGame()
 int main()
 {
     Board board;
-    board.playGame();
-    return 0;
+    board.showBoard();
+    //board.playGame();
+        return 0;
 }
