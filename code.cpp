@@ -5,6 +5,11 @@ using namespace std;
 #define Cross 'X'     //User's Symbol
 #define Circle 'O'    //Computer's Symbol
 #define empty '0'
+bool HumanMove = false;
+bool ComputerMove = true;
+char Check_Board[3][3];
+char Board_Layout[7][7];
+bool Turn;
 
 //Colour Scheming
 std::string reset = "\033[0m";
@@ -27,9 +32,7 @@ std::string lightblueb = "\033[1;36m";
 //Underline
 #define underline "\033[4m"
 #define closeunderline "\033[0m"
-char Check_Board[3][3];
-char Board_Layout[7][7];
-bool Turn;
+
 
 class Board
 {
@@ -44,13 +47,13 @@ public:
 };
 void Board::ChangeTurn()
 {
-    if (Turn == true)
+    if (Turn == ComputerMove)
     {
-        Turn = false;
+        Turn = HumanMove;
     }
     else
     {
-        Turn = true;
+        Turn = ComputerMove;
     }
 }
 void Board::initialize()
@@ -110,7 +113,7 @@ void Board::changeBoard(int x, int y)
 {
     x = (2 * x) + 1;
     y = (2 * y) + 1;
-    if (Turn == 0)
+    if (Turn == HumanMove)
     {
         Board_Layout[x][y] = Cross;
     }
@@ -393,11 +396,11 @@ void Board::playGame()
     int moves = 9;
     while (moves--)
     {
-        if (Turn == false)
+        if (Turn == HumanMove)
         {
             User_.Move();
         }
-        if (Turn == true)
+        else
         {
             Computer_.move();
         }
