@@ -5,8 +5,6 @@ using namespace std;
 #define Cross 'X'     //User's Symbol
 #define Circle 'O'    //Computer's Symbol
 #define empty '0'
-#define computer 1;
-#define user 0;
 
 //Colour Scheming
 std::string reset = "\033[0m";
@@ -36,8 +34,6 @@ bool Turn;
 class Board
 {
 public:
-   
-   
     void initialize();
     void changeBoard(int x, int y);
     void showBoard();
@@ -48,21 +44,19 @@ public:
 };
 void Board::ChangeTurn()
 {
-    if (Turn == 1)
+    if (Turn == true)
     {
-        Turn = user;
-  }  
-  else
-  {
-      Turn = computer;
-  }
-  
-
+        Turn = false;
+    }
+    else
+    {
+        Turn = true;
+    }
 }
 void Board::initialize()
 {
 
-    Turn = user;
+    Turn = false;
     //memset(Board_Layout, Blank, sizeof(Board_Layout));
     memset(Check_Board, empty, sizeof(Check_Board));
     for (int i = 0; i < 7; i++)
@@ -143,11 +137,11 @@ void Board::GameOver() //this function is called when either of the team wins th
     scanf("%d", &choice);
     switch (choice)
     {
-    case 1:
+    case 2:
         cout << "\t\t\t\tExiting Game...";
         break;
 
-    case 2:
+    case 1:
         system("cls");
         cout << "\t\t\t\tNEW GAME\n";
         showInstructions();
@@ -342,7 +336,6 @@ bool Computer::Intelligence_Level_User()
                 {
                     Check_Board[i][j] = Circle;
                     changeBoard(i, j);
-                    ChangeTurn();
                     return (true);
                 }
                 else
@@ -356,8 +349,8 @@ bool Computer::Intelligence_Level_User()
 }
 void Computer::randomMove()
 {
-    int run = 0;
-    while (run == 0)
+    bool run = true;
+    while (run == true)
     {
         int x = randNum(0, 2);
         int y = randNum(0, 2);
@@ -365,7 +358,7 @@ void Computer::randomMove()
         {
             Check_Board[x][y] = Circle;
             changeBoard(x, y);
-            run = 1;
+            run = false;
         }
     }
 }
@@ -375,22 +368,25 @@ void Computer::move()
     if (Intelligence_Level_Computer()) //Checks for a Winning Move
     {
         GameOver();
+        ChangeTurn();
+        return;
+    }
+
+    if (Intelligence_Level_User()) //checks if User has any Winning Move
+    {
+        cout << "\n\nComputer's Move\n";
+        showBoard();
+        ChangeTurn();
+        return;
     }
     else
     {
-        if (Intelligence_Level_User()) //checks if User has any Winning Move
-        {
-            cout << "\n\n";
-            showBoard();
-        }
-        else
-        {
-            randomMove(); //Generates a randon Move if no team has a Winning Move
-            cout << "\n\n";
-            showBoard();
-        }
+        randomMove(); //Generates a randon Move if no team has a Winning Move
+        cout << "\n\nComputer's Move\n";
+        showBoard();
+        ChangeTurn();
+        return;
     }
-    ChangeTurn();
 }
 void Board::playGame()
 {
@@ -400,17 +396,17 @@ void Board::playGame()
     int moves = 9;
     while (moves--)
     {
-        if (Turn == 0)
+        if (Turn == false)
         {
             User_.Move();
         }
-        if (Turn == 1)
+        if (Turn == true)
         {
             Computer_.move();
         }
     }
     cout << "\t\t\t\t\tIT'S A TIE!!!\n";
-    GameOver();  
+    GameOver();
 }
 
 int main()
